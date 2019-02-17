@@ -11,5 +11,4 @@ class DeviceModel {
 
 List<DeviceModel> MyDevices = [];
 List<DeviceFile> OpenedFiles = [];
-
 String ServerAddr = "http://10.18.67.245:3000";

@@ -8,28 +8,21 @@ import 'package:flutter_full_pdf_viewer/flutter_full_pdf_viewer.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_plugin.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_scaffold.dart';
 import 'package:dio/dio.dart';
-import 'package:learnspace/file_model.dart';
 
-class ViewPDF extends StatefulWidget {
-
-  DeviceFile file;
-  ViewPDF(this.file);
+class ViewText extends StatefulWidget {
 
   @override
-  State<StatefulWidget> createState() => _ViewPageState(file);
-  
+  State<StatefulWidget> createState() => _ViewTextState();
+
 }
 
-class _ViewPageState extends State<ViewPDF>{
+class _ViewTextState extends State<ViewText>{
 
   String filePath = "";
-  DeviceFile file;
-
-  _ViewPageState(this.file);
 
   @override
   void initState() {
-    _getPDF();
+    _getTxt();
   }
 
   @override
@@ -71,15 +64,15 @@ class _ViewPageState extends State<ViewPDF>{
       ],
     );
 
-    return this.filePath.isEmpty ? Scaffold(appBar: appBar, body: _getProgress(),) : _getPdfView(appBar);
+    return Scaffold(appBar: appBar, body: _getProgress(),);
   }
 
-  void _getPDF() async {
+  void _getTxt() async {
     await Future.delayed(Duration(seconds: 2));
     String p =  (await getApplicationDocumentsDirectory()).path;
-    await Dio().download("http://10.18.67.245:3000/uploads/C.pdf", p+'/C.pdf');
+    await Dio().download("http://10.18.67.245:3000/uploads/a.txt", p+'/a.txt');
     setState(() {
-      this.filePath = p + '/C.pdf';
+      this.filePath = p + '/C.txt';
       print(filePath);
     });
   }
@@ -94,16 +87,4 @@ class _ViewPageState extends State<ViewPDF>{
     );
   }
 
-  Widget _getPdfView(AppBar appbar) {
-    return GestureDetector(
-      onHorizontalDragUpdate: (details){
-        debugPrint(details.globalPosition.toString());
-      },
-      onTap: () => debugPrint('213'),
-      child: PDFViewerScaffold(
-        appBar: appbar,
-        path: this.filePath,
-      ),
-    );
-  }
 }

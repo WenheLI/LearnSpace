@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learnspace/store.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:learnspace/store.dart';
 import 'package:learnspace/file_model.dart';
