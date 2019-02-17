@@ -47,8 +47,7 @@ class MyApp extends StatelessWidget {
       socketIO.connect();
 
       Future.delayed(Duration( milliseconds: 10)).then((e){
-        socketIO.sendMessage('updateInfo', json.encode(DeviceInfo('Hello', 1, "iPad"
-            ".p0[p0/${Random().nextInt(1000)}")).toString());
+        socketIO.sendMessage('updateInfo', json.encode(DeviceInfo('Hello', 0, "Pixel${Random().nextInt(1000)}")).toString());
       });
     }
 
@@ -99,6 +98,8 @@ class MyApp extends StatelessWidget {
       DeviceFile _file = DeviceFile(name, name.split(".")[name.split(".").length - 1], temp['file_id'], "", url: temp['file_path']);
       _file.cursor = cursor;
       OpenedFiles.add(_file);
+
+      if (Navigator.of(MainRouterContext).canPop()) Navigator.of(MainRouterContext).pop();
 
       if (name.toString().endsWith('.pdf')) Navigator.of(MainRouterContext).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
       else Navigator.of(MainRouterContext).push(MaterialPageRoute(builder: (_) => ViewText(_file)));

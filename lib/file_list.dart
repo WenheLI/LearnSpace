@@ -126,7 +126,6 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
   Transform _CardWrapper(int i, WindowItem f, {double dx=0, double dy=0, double scale=1, bool opacity=false}) {
     double _s = scale > 1 ? 1.0 : scale;
-    final _file = OpenedFiles[i];
     return Transform.translate(
       offset: Offset(dx, dy + 16.0 + _computeOffset(i)),
       child: GestureDetector(
@@ -163,6 +162,7 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
               _updateDevicesState(progress: _currentFocusedDevice);
             }
 
+            final _file = OpenedFiles[_currentFocused];
             FormData formData = FormData.from({
               "pdf": UploadFileInfo(File(_file.filePath), _file.title)
             });
@@ -319,11 +319,11 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
 class WindowItem extends StatelessWidget {
 
-  DeviceFile _file;
+  DeviceFile file;
   int index;
   void Function() refresh;
 
-  WindowItem(this._file, this.index, this.refresh);
+  WindowItem(this.file, this.index, this.refresh);
 
   @override
   Widget build(BuildContext context) {
@@ -331,8 +331,8 @@ class WindowItem extends StatelessWidget {
 
       onTap: () {
         if (Navigator.of(context).canPop()) Navigator.of(context).pop();
-        if (_file.type == 'pdf') Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
-        else Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewText(_file)));
+        if (file.type == 'pdf') Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(file)));
+        else Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewText(file)));
       },
 
         child: Container(
@@ -345,7 +345,7 @@ class WindowItem extends StatelessWidget {
               padding: EdgeInsets.only(left: 16),
               child: Row(
                 children: <Widget>[
-                  Expanded(child: Text(_file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
+                  Expanded(child: Text(file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
                   IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: (){
 
                     OpenedFiles.removeAt(index);
@@ -366,7 +366,7 @@ class WindowItem extends StatelessWidget {
                   child: ConstrainedBox(
                     constraints: BoxConstraints.expand(),
                     child: Image(
-                      image: NetworkImage("$ServerAddr/${_file.type}.png"),
+                      image: NetworkImage("$ServerAddr/${file.type}.png"),
                       width: 140.0,
                     ),
                   ),
