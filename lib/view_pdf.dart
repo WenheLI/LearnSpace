@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'dart:async';
 import 'package:learnspace/file_list.dart';
+import 'package:learnspace/store.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_full_pdf_viewer/flutter_full_pdf_viewer.dart';
@@ -62,7 +63,7 @@ class _ViewPageState extends State<ViewPDF>{
                 alignment: Alignment.center,
                 child: Padding(
                   padding: const EdgeInsets.all(3.0),
-                  child: Text("1", style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.bold),),
+                  child: Text(OpenedFiles.length.toString(), style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.bold),),
                 )
             ),
           ),
@@ -99,15 +100,9 @@ class _ViewPageState extends State<ViewPDF>{
   }
 
   Widget _getPdfView(AppBar appbar) {
-    return GestureDetector(
-      onHorizontalDragUpdate: (details){
-        debugPrint(details.globalPosition.toString());
-      },
-      onTap: () => debugPrint('213'),
-      child: PDFViewerScaffold(
+    return PDFViewerScaffold(
         appBar: appbar,
         path: this.filePath,
-      ),
-    );
+      );
   }
 }

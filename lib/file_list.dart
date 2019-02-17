@@ -69,10 +69,16 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
   BuildContext _ctx;
 
+
+  refresh() {
+    _generateWindows();
+  }
+
+
   @override
   void initState() {
     _generateWindows();
-    _adjustWindows(999999);
+
 
     controller = AnimationController(
         duration: const Duration(milliseconds: 300), vsync: this);
@@ -213,8 +219,12 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
   }
 
   void _generateWindows() {
+    _content = [];
+    _machine = [];
+
+    int index = 0;
     OpenedFiles.forEach((f) {
-      _content.add(WindowItem(f));
+      _content.add(WindowItem(f, index++, this.refresh));
     });
 
     [0,1].forEach((i) {
@@ -222,6 +232,10 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
     });
 
     _updateDevicesState();
+    setState(() {
+      _adjustWindows(999999);
+    });
+
   }
 
   void _updateDevicesState({int progress: -1, int success: -1}) {
@@ -289,12 +303,13 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 class WindowItem extends StatelessWidget {
 
   DeviceFile _file;
+  int index;
+  void Function() refresh;
 
-  WindowItem(this._file);
+  WindowItem(this._file, this.index, this.refresh);
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(_file.toString());
     return GestureDetector(
 
       onTap: () =>  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file))),
@@ -310,7 +325,13 @@ class WindowItem extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Expanded(child: Text(_file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
-                  IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: null)
+                  IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: (){
+
+                    OpenedFiles.removeAt(index);
+                    this.refresh();
+//                    Navigator.pop(context);
+//                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => FileList()));
+                  })
                 ]
               )
             ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:learnspace/file_list.dart';
 import 'package:learnspace/file_model.dart';
 import 'package:learnspace/view_pdf.dart';
 import 'package:learnspace/store.dart';
@@ -8,15 +9,42 @@ import 'package:sticky_headers/sticky_headers.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 class HomePage extends StatelessWidget {
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Learn Space"),
-        actions: <Widget>[Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Icon(Icons.search, size: 32),
-        )],
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 12.0, left: 4.0),
+            child: GestureDetector(
+
+              onTap: ()  {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FileList()),
+                );
+              },
+
+              child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2),
+                      borderRadius: BorderRadius.all(Radius.circular(4))
+                  ),
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Text(OpenedFiles.length.toString(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                  )
+              ),
+            ),
+          )
+        ],
       ),
       body: InfiniteListView(),
     );
