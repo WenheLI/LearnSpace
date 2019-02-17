@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:learnspace/file_model.dart';
+import 'package:learnspace/view_pdf.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
-//6100ed
-//7e39fbe
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,143 +14,164 @@ class HomePage extends StatelessWidget {
           child: Icon(Icons.search, size: 32),
         )],
       ),
-      body: InfiniteGridView(),
+      body: InfiniteListView(),
     );
   }
 
 }
 
-class InfiniteGridView extends StatefulWidget {
+class InfiniteListView extends StatefulWidget {
   @override
-  _InfiniteGridViewState createState() => new _InfiniteGridViewState();
+  _InfiniteListViewState createState() => new _InfiniteListViewState();
 }
 
-class _InfiniteGridViewState extends State<InfiniteGridView> {
-
-  List<IconData> _icons = [];
+class _InfiniteListViewState extends State<InfiniteListView> {
+  var _files = <List<File>>[];
 
   @override
   void initState() {
-    _retrieveIcons();
+    _retrieveData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StaggeredGridView.countBuilder(
-      crossAxisCount: 4,
-      itemCount: _icons.length,
-      itemBuilder: (BuildContext context, int index) {
-        if (_icons.length - 1 == index && _icons.length < 200) {
-          _retrieveIcons();
-        }
-        if (index % 21 == 0) {
-          return Material(
-              color: Colors.grey.shade200,
-              child: Container(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Text("Txt",style: TextStyle(fontSize: 18),),
-                    )),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: InkWell(child: Icon(Icons.sort, size: 26,), onTap: ()=>debugPrint("heelo"),),
-                    )
-                  ],
+    return ListView.builder(
+      itemCount: _files.length,
+      itemBuilder: (context, index) {
+            return StickyHeader(
+              header:  Material(
+                color: Colors.grey.shade200,
+                child: Container(
+                  color: Colors.transparent,
+                  height: 50.0,
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  alignment: Alignment.centerLeft,
+                  child: Flex(
+                    children: <Widget>[
+                      Expanded(child: Text("Txt", style: TextStyle(fontSize: 24),)),
+                      IconButton(
+                        icon: Icon(Icons.sort),
+                        iconSize: 32,
+                        onPressed: () {
+                          debugPrint("clicl");
+                        },)
+                    ],
+                    direction: Axis.horizontal,
+                  )
                 ),
-          ));
-        } else {
-          return Displayer(_icons[index - (index ~/ 21) + 1]);
-        }
-      },
-      staggeredTileBuilder: (int index) =>
-      new StaggeredTile.count(index % 21 == 0 ? 4 : 2, index % 21 == 0 ? .5 : 1.8),
-      mainAxisSpacing: 2.0,
-      crossAxisSpacing: 2.0,
-    );
+              ),
+              content: DisplayRow(this._files[index])
+            );
+          }
+        );
+
   }
 
-  void _retrieveIcons() {
-    Future.delayed(Duration(milliseconds: 200)).then((e) {
+  void _retrieveData() {
+      var temp = List<File>();
       setState(() {
-        _icons.addAll([
-          Icons.ac_unit,
-          Icons.airport_shuttle,
-          Icons.all_inclusive,
-          Icons.beach_access, Icons.cake,
-          Icons.free_breakfast
-        ]);
+        for(var i = 0; i < 10; i++) {
+          temp.add(File("Hello " + i.toString(), "Type " + this._files.length.toString(), i.toString()));
+        }
+        _files.add(temp);
       });
-    });
+  }
+}
+
+class DisplayRow extends StatelessWidget {
+  var _files;
+
+  DisplayRow(this._files);
+
+  getElements(files) {
+    var res = List<Widget>();
+    for (var file in this._files) {
+      res.add(
+          Displayer(file)
+      );
+    }
+    return res;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+        spacing: 8.0,
+        runSpacing: 4.0,
+        alignment: WrapAlignment.start,
+          children:
+            getElements(_files)
+
+    );
   }
 }
 
 class Displayer extends StatelessWidget {
+  var _file;
 
-  IconData _icon;
-
-  Displayer(this._icon);
+  Displayer(this._file);
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-              child: FittedBox(
-              fit: BoxFit.fill,
-                child: Image(
-                  image: NetworkImage(
-                      "https://avatars2.githubusercontent.com/u/20411648?s=460&v=4"),
-                  width: 100.0,
-                )
-              )
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 2.0),
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow (
-                      color: Colors.grey.shade300,
-                      offset: new Offset(0.0, 2.0),
-                      blurRadius: 2.0,
-                    ),
-                  ],
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(4)
-                )
-              ),
-              child:
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                        padding:const EdgeInsets.all(8.0),
-                        child: Image(
-                          image: AssetImage("assets/pdf.png"),
-                          width: 30,
-                    )),
-                   Expanded(child: Padding(
-                     padding: const EdgeInsets.all(8.0),
-                     child: Text("Hello"),
-                   )),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(this._icon),
-                    )
-                  ],
-                )
+    return  GestureDetector(
+      onTap:() => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF())),
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          children: <Widget>[
+            Image(
+              image: NetworkImage(
+                  "https://avatars2.githubusercontent.com/u/20411648?s=460&v=4"),
+              width: 140.0,
             ),
-          )
-        ],
+            FuncBar()
+          ],
+        ),
       ),
     );
   }
   
+}
+
+class FuncBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Material(
+      color: Colors.grey.shade200,
+      child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(bottomRight: Radius.circular(4), bottomLeft: Radius.circular(4)),
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey.shade200,
+                    offset: Offset(2, 0)
+                )
+              ]
+          ),
+          width: MediaQuery.of(context).size.width / 2 - 5.0,
+          child:Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Image(
+                  image: AssetImage("assets/pdf.png"),
+                  width: 30,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Text("hello"),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: IconButton(icon: Icon(Icons.more_vert), onPressed: () => debugPrint("Pressed")),
+              ),
+            ],
+          )
+      ),
+    );
+  }
 }
