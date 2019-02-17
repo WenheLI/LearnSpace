@@ -10,8 +10,6 @@ import 'package:simple_permissions/simple_permissions.dart';
 
 class HomePage extends StatelessWidget {
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +53,7 @@ class HomePage extends StatelessWidget {
 class InfiniteListView extends StatefulWidget {
   @override
   _InfiniteListViewState createState() => new _InfiniteListViewState();
+
 }
 
 class _InfiniteListViewState extends State<InfiniteListView> {

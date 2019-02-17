@@ -7,6 +7,11 @@ class DeviceModel {
   Color color;
 
   DeviceModel(this.name, this.type, this.color);
+
+  DeviceModel.fromJson(Map<String, dynamic> json)
+      : type = json['device_type'],
+        name = json['nickname'],
+        color = Color(int.parse(json['color'], radix: 16));
 }
 
 List<DeviceModel> MyDevices = [];
