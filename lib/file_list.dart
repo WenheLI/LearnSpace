@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:learnspace/homepage.dart';
 import 'package:learnspace/store.dart';
+import 'package:learnspace/view_pdf.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:learnspace/store.dart';
 import 'package:learnspace/file_model.dart';
@@ -21,8 +23,10 @@ class FileList extends StatelessWidget {
         ],
         leading: FlatButton(
           shape: CircleBorder(),
-          child: Icon(Icons.add, color: Colors.black54),
-          onPressed: () {debugPrint("OK");},
+          child: Icon(Icons.arrow_back, color: Colors.black54),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ),
       body: WindowListViewer(),
@@ -286,41 +290,50 @@ class WindowItem extends StatelessWidget {
 
   DeviceFile _file;
 
-  WindowItem(_file);
+  WindowItem(this._file);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(10.0)), boxShadow: <BoxShadow>[BoxShadow(color: Color.fromARGB(25, 0, 0, 0), offset: Offset(5, 5), blurRadius: 5, spreadRadius: 5)]),
-      width: MediaQuery.of(context).size.width - 36,
-      height: MediaQuery.of(context).size.width * 1.6,
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(left: 16),
-            child: Row(
-              children: <Widget>[
-                Expanded(child: Text(_file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
-                IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: null)
-              ]
-            )
-          ),
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: EdgeInsets.only(left: 6, right: 6, bottom: 6),
-              child: Container(
-                decoration: BoxDecoration(color: Colors.black12,
-                borderRadius: BorderRadius.all(Radius.circular(6.0))),
-                child: Image(
-                  image: NetworkImage("$ServerAddr/${_file.type}.png"),
-                  width: 140.0,
-                ),
+    debugPrint(_file.toString());
+    return GestureDetector(
+
+      onTap: () =>  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file))),
+
+        child: Container(
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(10.0)), boxShadow: <BoxShadow>[BoxShadow(color: Color.fromARGB(25, 0, 0, 0), offset: Offset(5, 5), blurRadius: 5, spreadRadius: 5)]),
+        width: MediaQuery.of(context).size.width - 36,
+        height: MediaQuery.of(context).size.width * 1.6,
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: 16),
+              child: Row(
+                children: <Widget>[
+                  Expanded(child: Text(_file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
+                  IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: null)
+                ]
+              )
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: EdgeInsets.only(left: 6, right: 6, bottom: 6),
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.black12,
+                  borderRadius: BorderRadius.all(Radius.circular(6.0))),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints.expand(),
+                    child: Image(
+                      image: NetworkImage("$ServerAddr/${_file.type}.png"),
+                      width: 140.0,
+                    ),
+                  ),
+                )
               )
             )
-          )
-        ]
-      )
+          ]
+        )
+      ),
     );
   }
 }

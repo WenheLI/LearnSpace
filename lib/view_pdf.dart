@@ -38,7 +38,7 @@ class _ViewPageState extends State<ViewPDF>{
     AppBar appBar = AppBar(
       iconTheme: IconThemeData(color: Colors.grey.shade800),
       backgroundColor: Colors.grey.shade300,
-      title: Text("txt", style: TextStyle(color: Colors.grey.shade800)),
+      title: Text(file.title, style: TextStyle(color: Colors.grey.shade800)),
       actions: <Widget>[
         Padding(
           padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 4.0),
@@ -75,13 +75,17 @@ class _ViewPageState extends State<ViewPDF>{
   }
 
   void _getPDF() async {
-    await Future.delayed(Duration(seconds: 2));
-    String p =  (await getApplicationDocumentsDirectory()).path;
-    await Dio().download("http://10.18.67.245:3000/uploads/C.pdf", p+'/C.pdf');
-    setState(() {
-      this.filePath = p + '/C.pdf';
-      print(filePath);
-    });
+    if (file == null) {
+        String p = (await getApplicationDocumentsDirectory()).path;
+        await Dio().download(
+            "http://10.18.67.245:3000/uploads/C.pdf", p + '/C.pdf');
+        setState(() {
+          this.filePath = p + '/C.pdf';
+          print(filePath);
+        });
+    } else {
+      this.filePath = file.filePath;
+    }
   }
 
   Widget _getProgress() {
