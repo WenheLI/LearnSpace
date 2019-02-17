@@ -47,7 +47,8 @@ class MyApp extends StatelessWidget {
       socketIO.connect();
 
       Future.delayed(Duration( milliseconds: 10)).then((e){
-        socketIO.sendMessage('updateInfo', json.encode(DeviceInfo('Hello', 0, "Pixel${Random().nextInt(1000)}")).toString());
+        socketIO.sendMessage('updateInfo', json.encode(DeviceInfo('Hello', 1, "iPad"
+            ".p0[p0/${Random().nextInt(1000)}")).toString());
       });
     }
 
