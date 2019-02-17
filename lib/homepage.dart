@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:learnspace/file_list.dart';
 import 'package:learnspace/file_model.dart';
 import 'package:learnspace/view_pdf.dart';
+import 'package:learnspace/view_text.dart';
 import 'package:learnspace/store.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'package:simple_permissions/simple_permissions.dart';
+import 'package:path_provider/path_provider.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -101,14 +103,19 @@ class _InfiniteListViewState extends State<InfiniteListView> {
 
   void _retrieveData() async {
       var temp = List<List<DeviceFile>>();
+      String pdfPath = "";
 
-      bool ok = await SimplePermissions.checkPermission(Permission.WriteExternalStorage);
-      if (!ok) {
-        await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+      if (Platform.isAndroid) {
+        bool ok = await SimplePermissions.checkPermission(
+            Permission.WriteExternalStorage);
+        if (!ok) {
+          await SimplePermissions.requestPermission(
+              Permission.WriteExternalStorage);
+        }
+        pdfPath = "/sdcard/Download/";
+      } else {
+        pdfPath = (await getApplicationDocumentsDirectory()).path;
       }
-
-
-      String pdfPath = "/sdcard/Download/";
       List<String> files = Directory
         .fromUri(Uri.file(pdfPath))
         .listSync(recursive: true, followLinks: false)
@@ -168,7 +175,8 @@ class Displayer extends StatelessWidget {
     return  GestureDetector(
       onTap:() {
         OpenedFiles.add(_file);
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
+        if (_file.type == 'pdf') Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
+        else Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewText(_file)));
       },
       child: Container(
         color: Colors.transparent,

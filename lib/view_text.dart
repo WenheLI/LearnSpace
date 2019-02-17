@@ -8,17 +8,24 @@ import 'package:flutter_full_pdf_viewer/flutter_full_pdf_viewer.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_plugin.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_scaffold.dart';
 import 'package:dio/dio.dart';
+import 'package:learnspace/file_model.dart';
 
 class ViewText extends StatefulWidget {
 
+  DeviceFile file;
+  ViewText(this.file);
+
   @override
-  State<StatefulWidget> createState() => _ViewTextState();
+  State<StatefulWidget> createState() => _ViewTextState(file);
 
 }
 
 class _ViewTextState extends State<ViewText>{
 
+  DeviceFile file;
   String filePath = "";
+
+  _ViewTextState(this.file);
 
   @override
   void initState() {
@@ -31,7 +38,7 @@ class _ViewTextState extends State<ViewText>{
     AppBar appBar = AppBar(
       iconTheme: IconThemeData(color: Colors.grey.shade800),
       backgroundColor: Colors.grey.shade300,
-      title: Text("txt", style: TextStyle(color: Colors.grey.shade800)),
+      title: Text(file.title, style: TextStyle(color: Colors.grey.shade800)),
       actions: <Widget>[
         Padding(
           padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 4.0),
