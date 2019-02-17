@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:learnspace/homepage.dart';
 import 'package:learnspace/store.dart';
@@ -6,6 +8,7 @@ import 'package:learnspace/view_text.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:learnspace/store.dart';
 import 'package:learnspace/file_model.dart';
+import 'package:dio/dio.dart';
 
 class FileList extends StatelessWidget {
   @override
@@ -64,10 +67,6 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
   Animation<double> animation;
   AnimationController controller;
 
-  List _devicesNames = ['Mac', 'iPad'];
-  List _devicesTypes = [2, 1];
-  List _devicesColor = [Colors.amber, Colors.blue];
-
   BuildContext _ctx;
 
 
@@ -79,7 +78,6 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
   @override
   void initState() {
     _generateWindows();
-
 
     controller = AnimationController(
         duration: const Duration(milliseconds: 300), vsync: this);
@@ -115,7 +113,7 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
   void _finishSend() {
     _updateDevicesState(success: _currentFocusedDevice);
     final snackBar = SnackBar(
-      content: Text("Upload to Device: " + _devicesNames[_currentFocusedDevice]),
+      content: Text("Upload to Device: " + MyDevices[_currentFocusedDevice].name),
       action: SnackBarAction(
         label: 'Dismiss',
         onPressed: () {},
@@ -128,6 +126,7 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
   Transform _CardWrapper(int i, WindowItem f, {double dx=0, double dy=0, double scale=1, bool opacity=false}) {
     double _s = scale > 1 ? 1.0 : scale;
+    final _file = OpenedFiles[i];
     return Transform.translate(
       offset: Offset(dx, dy + 16.0 + _computeOffset(i)),
       child: GestureDetector(
@@ -140,6 +139,7 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
           _singleDragStartX = details.globalPosition.dx;
           _singleDragStartY = details.globalPosition.dy;
           _currentFocused = i;
+
           controller.forward();
         },
         onLongPressDragUp: (GestureLongPressDragUpDetails details) {
@@ -155,16 +155,32 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
             final double stepX = targetDx - currentDx;
             final double stepY = targetDy - currentDy;
 
-            for (int i = 0; i < 10; i ++) {
-              final int d = i;
-              Future.delayed(Duration(milliseconds: 20 * d), () {
-                _adjustWindows(_yOffset, dx: currentDx + stepX * d, dy: currentDy + stepY * d, scale: i == 9 ? 0.0 : 0.8 / i);
+            for (int j = 0; j < 10; j ++) {
+              final int d = j;
+              Future.delayed(Duration(milliseconds: 15 * d), () {
+                _adjustWindows(_yOffset, dx: currentDx + stepX * d, dy: currentDy + stepY * d, scale: d == 9 ? 0.0 : 0.8 / d);
               });
               _updateDevicesState(progress: _currentFocusedDevice);
             }
 
-            Future.delayed(Duration(seconds: 5), () {
-              _finishSend();
+            FormData formData = FormData.from({
+              "pdf": UploadFileInfo(File(_file.filePath), _file.title)
+            });
+
+            Dio().post(ServerAddr+'/file', data: formData).then((e)  {
+              Dio dio = Dio();
+              dio.options.contentType=ContentType.parse("application/x-www-form-urlencoded");
+              dio.post(ServerAddr+'/device', data: {
+                "device_id": MyDevices[_currentFocusedDevice].device_id,
+                "file_id": e.data['file_id'],
+                "file_state": {"cursor": _file.cursor}
+              }, options: new Options(contentType:ContentType.parse("application/x-www-form-urlencoded"))).then((e){
+                print(e.data);
+                if (e.data['state']) {
+                  OpenedFiles.removeAt(_currentFocused);
+                  _finishSend();
+                }
+              });
             });
 
           } else {
@@ -177,7 +193,7 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
         },
         onLongPressDragUpdate: (GestureLongPressDragUpdateDetails details) {
           int _tmpFocusedDevice = -1;
-          for (int i = 0; i < 2; i++) {
+          for (int i = 0; i < MyDevices.length; i++) {
             final RenderBox rdBox = _keyOfDevices[i].currentContext.findRenderObject();
             final double x = rdBox.localToGlobal(Offset.zero).dx;
             final double y = rdBox.localToGlobal(Offset.zero).dy;
@@ -228,8 +244,9 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
       _content.add(WindowItem(f, index++, this.refresh));
     });
 
-    [0,1].forEach((i) {
-      _machine.add(DeviceItem(_devicesNames[i], _devicesTypes[i], _devicesColor[i], 0));
+    MyDevices.forEach((f) {
+      print(f.name);
+      _machine.add(DeviceItem(f.name, f.type, f.color, 0));
     });
 
     _updateDevicesState();
@@ -241,10 +258,10 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
   void _updateDevicesState({int progress: -1, int success: -1}) {
     int i = 0;
-    if (progress != -1) _machine[progress] = DeviceItem(_devicesNames[progress], _devicesTypes[progress], _devicesColor[progress], 1);
-    else if (success != -1) _machine[success] = DeviceItem(_devicesNames[success], _devicesTypes[success], _devicesColor[success], 0);
+    if (progress != -1 && progress < MyDevices.length) _machine[progress] = DeviceItem(MyDevices[progress].name, MyDevices[progress].type, MyDevices[progress].color, 1);
+    else if (success != -1 && success < MyDevices.length) _machine[success] = DeviceItem(MyDevices[success].name, MyDevices[success].type, MyDevices[success].color, 0);
     setState(() {
-      _keyOfDevices = List(2).map((f) => GlobalKey()).toList();
+      _keyOfDevices = List(MyDevices.length).map((f) => GlobalKey()).toList();
       _devices = _machine.map((f) {
         i++;
         return Opacity(key: _keyOfDevices[i-1], child: f, opacity: i-1 == _currentFocusedDevice ? 1.0 : 0.5);
@@ -254,7 +271,6 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    int i = 0;
     _ctx = context;
     return ConstrainedBox(
       constraints: BoxConstraints.expand(),
@@ -314,6 +330,7 @@ class WindowItem extends StatelessWidget {
     return GestureDetector(
 
       onTap: () {
+        if (Navigator.of(context).canPop()) Navigator.of(context).pop();
         if (_file.type == 'pdf') Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
         else Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewText(_file)));
       },
@@ -396,7 +413,7 @@ class DeviceItem extends StatelessWidget {
               width: 64,
               height: 20,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(64), color: color, boxShadow: <BoxShadow>[BoxShadow(color: Color.fromARGB(25, 0, 0, 0), offset: Offset(2, 2), blurRadius: 2, spreadRadius: 2)]),
-              child: Center(child: Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),))
+              child: Center(child: Text(name ?? "Unknown", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),))
             ),
           )
         ]

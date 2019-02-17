@@ -24,7 +24,6 @@ class ViewPDF extends StatefulWidget {
 
 class _ViewPageState extends State<ViewPDF>{
 
-  String filePath = "";
   DeviceFile file;
 
   _ViewPageState(this.file);
@@ -43,7 +42,7 @@ class _ViewPageState extends State<ViewPDF>{
       title: Text(file.title, style: TextStyle(color: Colors.grey.shade800)),
       actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 4.0),
+          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 22.0),
           child: GestureDetector(
 
             onTap: ()  {
@@ -69,11 +68,14 @@ class _ViewPageState extends State<ViewPDF>{
             ),
           ),
         ),
-        IconButton(icon: Icon(Icons.more_vert, color: Colors.grey.shade800), iconSize: 32, onPressed: () => debugPrint("pressed"),)
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(icon: Icon(Icons.more_vert, color: Colors.grey.shade800), iconSize: 32, onPressed: () => debugPrint("pressed"),),
+        )
       ],
     );
 
-    return this.filePath.isEmpty ? Scaffold(appBar: appBar, body: _getProgress(),) : _getPdfView(appBar);
+    return file.filePath.isEmpty ? Scaffold(appBar: appBar, body: _getProgress(),) : _getPdfView(appBar);
   }
 
   void _getPDF() async {
@@ -85,19 +87,16 @@ class _ViewPageState extends State<ViewPDF>{
         await SimplePermissions.requestPermission(
             Permission.WriteExternalStorage);
       }
-      p = "/sdcard/Download/";
+      p = "/sdcard/Download";
     } else {
       p = (await getApplicationDocumentsDirectory()).path;
     }
-    if (file == null) {
+    if (file.filePath.isEmpty) {
         await Dio().download(
-            "http://10.18.67.245:3000/uploads/C.pdf", p + '/C.pdf');
+          ServerAddr + file.url, p + '/' + file.title);
         setState(() {
-          this.filePath = p + '/C.pdf';
-          print(filePath);
+          file.filePath = p + '/' + file.title;
         });
-    } else {
-      setState(() {this.filePath = file.filePath;});
     }
   }
 
@@ -114,7 +113,7 @@ class _ViewPageState extends State<ViewPDF>{
   Widget _getPdfView(AppBar appbar) {
     return PDFViewerScaffold(
         appBar: appbar,
-        path: this.filePath,
+        path: file.filePath,
       );
   }
 }

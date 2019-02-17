@@ -14,6 +14,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    MainRouterContext = context;
     return Scaffold(
       appBar: AppBar(
         title: Text("Learn Space"),
@@ -171,6 +172,7 @@ class Displayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     String imageFile = _file.type + ".png";
     return  GestureDetector(
       onTap:() {

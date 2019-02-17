@@ -25,7 +25,6 @@ class ViewText extends StatefulWidget {
 class _ViewTextState extends State<ViewText>{
 
   DeviceFile file;
-  String filePath = "";
   String fileData = "";
 
   int _cursor = -1;
@@ -48,7 +47,7 @@ class _ViewTextState extends State<ViewText>{
       title: Text(file.title, style: TextStyle(color: Colors.grey.shade800)),
       actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 4.0),
+          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 22.0),
           child: GestureDetector(
 
             onTap: ()  {
@@ -80,14 +79,12 @@ class _ViewTextState extends State<ViewText>{
 
     return Scaffold(
         appBar: appBar,
-        body: this.filePath.isEmpty ? _getProgress()
-              : _getTxtView(this.filePath)
+        body: file.filePath.isEmpty ? _getProgress()
+              : _getTxtView(file.filePath)
       );
   }
 
   void _getTxt() async {
-    print(file);
-    print(filePath);
     String p = "";
     if (Platform.isAndroid) {
       bool ok = await SimplePermissions.checkPermission(
@@ -100,24 +97,22 @@ class _ViewTextState extends State<ViewText>{
     } else {
       p = (await getApplicationDocumentsDirectory()).path;
     }
-    if (file == null) {
+    if (file.filePath.isEmpty) {
       await Dio().download(
-          "http://10.18.67.245:3000/uploads/a.txt", p + '/a.txt');
+          ServerAddr + file.url, p + '/' + file.title);
       setState(() {
-        this.filePath = p + '/a.txt';
-        print(filePath);
-      });
-    } else {
-      setState(() { this.filePath = file.filePath; });
-      Future.delayed(Duration(milliseconds: 100), () async {
-        File f = File.fromUri(Uri.file(file.filePath));
-        myController.text = f.readAsStringSync();
-        if (file.cursor != -1) {
-          myController.selection = new TextSelection.fromPosition(
-              new TextPosition(offset: file.cursor));
-        }
+        file.filePath = p + '/' + file.title;
       });
     }
+    Future.delayed(Duration(milliseconds: 100), () async {
+      File f = File.fromUri(Uri.file(file.filePath));
+      myController.text = f.readAsStringSync();
+      if (file.cursor != -1) {
+        await Future.delayed(Duration(milliseconds: 100));
+        myController.selection = new TextSelection.fromPosition(
+            new TextPosition(offset: file.cursor));
+      }
+    });
   }
 
   Widget _getProgress() {

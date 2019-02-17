@@ -26,6 +26,7 @@ dependencies:
   dio: ^2.0.0
   flutter_full_pdf_viewer: ^1.0.2
   webview_flutter: ^0.3.3+1
+  flutter_socket_io: ^0.4.6
 
 
 
