@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learnspace/homepage.dart';
 import 'package:learnspace/store.dart';
 import 'package:learnspace/view_pdf.dart';
+import 'package:learnspace/view_text.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:learnspace/store.dart';
 import 'package:learnspace/file_model.dart';
@@ -312,7 +313,10 @@ class WindowItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
 
-      onTap: () =>  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file))),
+      onTap: () {
+        if (_file.type == 'pdf') Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
+        else Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewText(_file)));
+      },
 
         child: Container(
         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(10.0)), boxShadow: <BoxShadow>[BoxShadow(color: Color.fromARGB(25, 0, 0, 0), offset: Offset(5, 5), blurRadius: 5, spreadRadius: 5)]),

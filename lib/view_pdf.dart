@@ -10,6 +10,7 @@ import 'package:flutter_full_pdf_viewer/full_pdf_viewer_plugin.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_scaffold.dart';
 import 'package:dio/dio.dart';
 import 'package:learnspace/file_model.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class ViewPDF extends StatefulWidget {
 
@@ -76,8 +77,19 @@ class _ViewPageState extends State<ViewPDF>{
   }
 
   void _getPDF() async {
+    String p = "";
+    if (Platform.isAndroid) {
+      bool ok = await SimplePermissions.checkPermission(
+          Permission.WriteExternalStorage);
+      if (!ok) {
+        await SimplePermissions.requestPermission(
+            Permission.WriteExternalStorage);
+      }
+      p = "/sdcard/Download/";
+    } else {
+      p = (await getApplicationDocumentsDirectory()).path;
+    }
     if (file == null) {
-        String p = (await getApplicationDocumentsDirectory()).path;
         await Dio().download(
             "http://10.18.67.245:3000/uploads/C.pdf", p + '/C.pdf');
         setState(() {
@@ -85,7 +97,7 @@ class _ViewPageState extends State<ViewPDF>{
           print(filePath);
         });
     } else {
-      this.filePath = file.filePath;
+      setState(() {this.filePath = file.filePath;});
     }
   }
 
