@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:learnspace/file_model.dart';
 import 'package:learnspace/view_pdf.dart';
+import 'package:learnspace/store.dart';
 import 'package:sticky_headers/sticky_headers.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -26,7 +30,8 @@ class InfiniteListView extends StatefulWidget {
 }
 
 class _InfiniteListViewState extends State<InfiniteListView> {
-  var _files = <List<File>>[];
+  var _files = <List<DeviceFile>>[];
+  List<String> _types = ["pdf", "txt"];
 
   @override
   void initState() {
@@ -48,7 +53,7 @@ class _InfiniteListViewState extends State<InfiniteListView> {
                   alignment: Alignment.centerLeft,
                   child: Flex(
                     children: <Widget>[
-                      Expanded(child: Text("Txt", style: TextStyle(fontSize: 24),)),
+                      Expanded(child: Text(_types[index].toUpperCase(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54))),
                       IconButton(
                         icon: Icon(Icons.sort),
                         iconSize: 32,
@@ -67,19 +72,38 @@ class _InfiniteListViewState extends State<InfiniteListView> {
 
   }
 
-  void _retrieveData() {
-      var temp = List<File>();
+  void _retrieveData() async {
+      var temp = List<List<DeviceFile>>();
+
+      bool ok = await SimplePermissions.checkPermission(Permission.WriteExternalStorage);
+      if (!ok) {
+        await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+      }
+
+
+      String pdfPath = "/sdcard/Download/";
+      List<String> files = Directory
+        .fromUri(Uri.file(pdfPath))
+        .listSync(recursive: true, followLinks: false)
+        .map((f) => f.path).toList();
+
+      _types.forEach((ext) {
+        temp.add(files
+          .where((f) => f.endsWith(ext))
+          .map((f) => DeviceFile(f.split("/")[f.split("/").length - 1], ext, "", f))
+          .toList());
+      });
+
+      print(temp);
+
       setState(() {
-        for(var i = 0; i < 10; i++) {
-          temp.add(File("Hello " + i.toString(), "Type " + this._files.length.toString(), i.toString()));
-        }
-        _files.add(temp);
+        _files = temp;
       });
   }
 }
 
 class DisplayRow extends StatelessWidget {
-  var _files;
+  List<DeviceFile> _files;
 
   DisplayRow(this._files);
 
@@ -107,24 +131,27 @@ class DisplayRow extends StatelessWidget {
 }
 
 class Displayer extends StatelessWidget {
-  var _file;
+  DeviceFile _file;
 
   Displayer(this._file);
 
   @override
   Widget build(BuildContext context) {
+    String imageFile = _file.type + ".png";
     return  GestureDetector(
-      onTap:() => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF())),
+      onTap:() {
+        OpenedFiles.add(_file);
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => ViewPDF(_file)));
+      },
       child: Container(
         color: Colors.transparent,
         child: Column(
           children: <Widget>[
             Image(
-              image: NetworkImage(
-                  "https://avatars2.githubusercontent.com/u/20411648?s=460&v=4"),
+              image: NetworkImage("$ServerAddr/$imageFile"),
               width: 140.0,
             ),
-            FuncBar()
+            FuncBar(_file)
           ],
         ),
       ),
@@ -134,6 +161,11 @@ class Displayer extends StatelessWidget {
 }
 
 class FuncBar extends StatelessWidget {
+
+  DeviceFile myfile;
+
+  FuncBar(this.myfile);
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -150,23 +182,24 @@ class FuncBar extends StatelessWidget {
                 )
               ]
           ),
-          width: MediaQuery.of(context).size.width / 2 - 5.0,
+          width: MediaQuery.of(context).size.width / 2 - 4.0,
           child:Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(4.0),
+              Expanded(
+                flex: 2,
                 child: Image(
-                  image: AssetImage("assets/pdf.png"),
-                  width: 30,
+                  image: AssetImage("assets/${myfile.type}.png"),
+                  width: 25,
+                  height: 25,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Text("hello"),
+              Expanded(
+                flex: 5,
+                child: Text(myfile.title, style: TextStyle(decorationStyle: TextDecorationStyle.dotted), maxLines: 1,),
               ),
-              Padding(
-                padding: const EdgeInsets.all(4.0),
+              Expanded(
+                flex: 2,
                 child: IconButton(icon: Icon(Icons.more_vert), onPressed: () => debugPrint("Pressed")),
               ),
             ],

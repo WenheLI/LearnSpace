@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learnspace/file_model.dart';
 
 class DeviceModel {
   String name;
@@ -9,3 +10,6 @@ class DeviceModel {
 }
 
 List<DeviceModel> MyDevices = [];
+List<DeviceFile> OpenedFiles = [];
+
+String ServerAddr = "http://10.18.67.245:3000";

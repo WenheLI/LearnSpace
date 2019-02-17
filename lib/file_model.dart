@@ -1,7 +1,8 @@
-class File {
+class DeviceFile {
   final String title;
   final String type;
   final String fileId;
+  final String filePath;
 
-  File(this.title, this.type, this.fileId);
+  DeviceFile(this.title, this.type, this.fileId, this.filePath);
 }

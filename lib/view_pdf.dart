@@ -7,17 +7,24 @@ import 'package:flutter_full_pdf_viewer/flutter_full_pdf_viewer.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_plugin.dart';
 import 'package:flutter_full_pdf_viewer/full_pdf_viewer_scaffold.dart';
 import 'package:dio/dio.dart';
+import 'package:learnspace/file_model.dart';
 
 class ViewPDF extends StatefulWidget {
 
+  DeviceFile file;
+  ViewPDF(this.file);
+
   @override
-  State<StatefulWidget> createState() => _ViewPageState();
+  State<StatefulWidget> createState() => _ViewPageState(file);
   
 }
 
 class _ViewPageState extends State<ViewPDF>{
 
   String filePath = "";
+  DeviceFile file;
+
+  _ViewPageState(this.file);
 
   @override
   void initState() {
@@ -33,9 +40,10 @@ class _ViewPageState extends State<ViewPDF>{
       title: Text("txt", style: TextStyle(color: Colors.grey.shade800)),
       actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 4.0),
+          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 4.0),
           child: Container(
-              width: 28,
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade800, width: 2),
                   borderRadius: BorderRadius.all(Radius.circular(4))
@@ -43,7 +51,7 @@ class _ViewPageState extends State<ViewPDF>{
               alignment: Alignment.center,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
-                child: Text("1", style: TextStyle(color: Colors.grey.shade800),),
+                child: Text("1", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade800),),
               )
           ),
         ),

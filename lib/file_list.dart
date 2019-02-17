@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vibrate/vibrate.dart';
+import 'package:learnspace/store.dart';
+import 'package:learnspace/file_model.dart';
 
 class FileList extends StatelessWidget {
   @override
@@ -206,8 +208,8 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
   }
 
   void _generateWindows() {
-    [0,1,2,3,4].forEach((i) {
-      _content.add(WindowItem());
+    OpenedFiles.forEach((f) {
+      _content.add(WindowItem(f));
     });
 
     [0,1].forEach((i) {
@@ -280,6 +282,11 @@ class _WindowListViewerState extends State<WindowListViewer> with SingleTickerPr
 }
 
 class WindowItem extends StatelessWidget {
+
+  DeviceFile _file;
+
+  WindowItem(_file);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -292,7 +299,7 @@ class WindowItem extends StatelessWidget {
             padding: EdgeInsets.only(left: 16),
             child: Row(
               children: <Widget>[
-                Expanded(child: Text("Hahahaha", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
+                Expanded(child: Text(_file.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),)),
                 IconButton(icon: Icon(Icons.cancel, size: 18), onPressed: null)
               ]
             )
@@ -301,7 +308,14 @@ class WindowItem extends StatelessWidget {
             flex: 1,
             child: Padding(
               padding: EdgeInsets.only(left: 6, right: 6, bottom: 6),
-              child: Container(decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.all(Radius.circular(6.0))))
+              child: Container(
+                decoration: BoxDecoration(color: Colors.black12,
+                borderRadius: BorderRadius.all(Radius.circular(6.0))),
+                child: Image(
+                  image: NetworkImage("$ServerAddr/${_file.type}.png"),
+                  width: 140.0,
+                ),
+              )
             )
           )
         ]
